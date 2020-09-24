@@ -36,7 +36,6 @@ const Order = require('dw/order/Order');
 const AdyenHelper = require('*/cartridge/scripts/util/adyenHelper');
 const RiskDataHelper = require('*/cartridge/scripts/util/riskDataHelper');
 const AdyenGetOpenInvoiceData = require('*/cartridge/scripts/adyenGetOpenInvoiceData');
-const adyenLevelTwoThreeData = require('*/cartridge/scripts/adyenLevelTwoThreeData');
 
 function createPaymentRequest(args) {
   try {
@@ -61,11 +60,6 @@ function createPaymentRequest(args) {
       paymentRequest = AdyenHelper.add3DS2Data(paymentRequest);
     }
 
-    // L2/3 Data
-    if (AdyenHelper.getAdyenLevel23DataEnabled()) {
-      paymentRequest.additionalData = { ...paymentRequest.additionalData, ...adyenLevelTwoThreeData.getLineItems(args) };
-    }
-
     const myAmount = AdyenHelper.getCurrencyValueForApi(
       paymentInstrument.paymentTransaction.amount,
     ); // args.Amount * 100;
@@ -75,7 +69,8 @@ function createPaymentRequest(args) {
     };
 
     const paymentMethodType = paymentRequest.paymentMethod.type;
-    // Create billing and delivery address objects for new orders, no address fields for credit cards through My Account
+    // Create billing and delivery address objects for new orders,
+    // no address fields for credit cards through My Account
     paymentRequest = AdyenHelper.createAddressObjects(
       order,
       paymentMethodType,
@@ -84,8 +79,8 @@ function createPaymentRequest(args) {
 
     // Create shopper data fields
     paymentRequest = AdyenHelper.createShopperObject({
-      order: order,
-      paymentRequest: paymentRequest,
+      order,
+      paymentRequest,
     });
 
     if (session.privacy.adyenFingerprint) {
@@ -96,7 +91,7 @@ function createPaymentRequest(args) {
       paymentRequest.lineItems = AdyenGetOpenInvoiceData.getLineItems(args);
       if (
         paymentRequest.paymentMethod.type.indexOf('ratepay') > -1
-        && session.privacy.ratePayFingerprint
+          && session.privacy.ratePayFingerprint
       ) {
         paymentRequest.deviceFingerprint = session.privacy.ratePayFingerprint;
       }
@@ -105,18 +100,14 @@ function createPaymentRequest(args) {
     if (paymentMethodType === 'paywithgoogle') {
       paymentRequest.browserInfo = {};
     }
+
     // make API call
     return doPaymentCall(order, paymentInstrument, paymentRequest);
   } catch (e) {
     Logger.getLogger('Adyen').error(
       `error processing payment. Error message: ${
         e.message
-      } more details: ${
-        e.toString()
-      } in ${
-        e.fileName
-      }:${
-        e.lineNumber}`,
+      } more details: ${e.toString()} in ${e.fileName}:${e.lineNumber}`,
     );
     return { error: true };
   }
@@ -129,14 +120,9 @@ function doPaymentCall(order, paymentInstrument, paymentRequest) {
     const callResult = executeCall(AdyenHelper.SERVICE.PAYMENT, paymentRequest);
     if (callResult.isOk() === false) {
       Logger.getLogger('Adyen').error(
-        `Adyen: Call error code${
-          callResult.getError().toString()
-        } Error => ResponseStatus: ${
-          callResult.getStatus()
-        } | ResponseErrorText: ${
-          callResult.getErrorMessage()
-        } | ResponseText: ${
-          callResult.getMsg()}`,
+        `Adyen: Call error code${callResult
+          .getError()
+          .toString()} Error => ResponseStatus: ${callResult.getStatus()} | ResponseErrorText: ${callResult.getErrorMessage()} | ResponseText: ${callResult.getMsg()}`,
       );
       paymentResponse.adyenErrorMessage = Resource.msg(
         'confirm.error.declined',
@@ -154,8 +140,7 @@ function doPaymentCall(order, paymentInstrument, paymentRequest) {
       throw new Error(
         `No correct response from ${
           AdyenHelper.SERVICE.PAYMENT
-        }, result: ${
-          JSON.stringify(resultObject)}`,
+        }, result: ${JSON.stringify(resultObject)}`,
       );
     }
 
@@ -170,7 +155,8 @@ function doPaymentCall(order, paymentInstrument, paymentRequest) {
       return { error: true };
     }
 
-    // There is no order for zero auth transactions. Return response directly to PaymentInstruments-SavePayment
+    // There is no order for zero auth transactions.
+    // Return response directly to PaymentInstruments-SavePayment
     if (!order) {
       return responseObject;
     }
@@ -196,7 +182,7 @@ function doPaymentCall(order, paymentInstrument, paymentRequest) {
     // Check the response object from /payment call
     if (
       paymentResponse.resultCode === 'IdentifyShopper'
-      || paymentResponse.resultCode === 'ChallengeShopper'
+        || paymentResponse.resultCode === 'ChallengeShopper'
     ) {
       paymentResponse.decision = 'ACCEPT';
       paymentResponse.threeDS2 = true;
@@ -210,7 +196,7 @@ function doPaymentCall(order, paymentInstrument, paymentRequest) {
       paymentResponse.paymentData = responseObject.paymentData;
     } else if (
       paymentResponse.resultCode === 'Authorised'
-      || paymentResponse.resultCode === 'RedirectShopper'
+        || paymentResponse.resultCode === 'RedirectShopper'
     ) {
       paymentResponse.decision = 'ACCEPT';
       paymentResponse.paymentData = responseObject.paymentData;
@@ -309,25 +295,22 @@ function doPaymentDetailsCall(paymentDetailsRequest) {
   );
   if (callResult.isOk() === false) {
     Logger.getLogger('Adyen').error(
-      `Adyen: Call error code${
-        callResult.getError().toString()
-      } Error => ResponseStatus: ${
-        callResult.getStatus()
-      } | ResponseErrorText: ${
-        callResult.getErrorMessage()
-      } | ResponseText: ${
-        callResult.getMsg()}`,
+      `Adyen: Call error code${callResult
+        .getError()
+        .toString()} Error => ResponseStatus: ${callResult.getStatus()} | ResponseErrorText: ${callResult.getErrorMessage()} | ResponseText: ${callResult.getMsg()}`,
     );
     return {
       error: true,
+      invalidRequest: true,
     };
   }
 
   const resultObject = callResult.object;
   if (!resultObject || !resultObject.getText()) {
     Logger.getLogger('Adyen').error(
-      `Error in /payment/details response, response: ${
-        JSON.stringify(resultObject)}`,
+      `Error in /payment/details response, response: ${JSON.stringify(
+        resultObject,
+      )}`,
     );
     return { error: true };
   }
@@ -342,6 +325,7 @@ function doPaymentDetailsCall(paymentDetailsRequest) {
     );
     return { error: true };
   }
+
   return responseObject;
 }
 
@@ -359,7 +343,7 @@ function executeCall(serviceType, requestObject) {
 }
 
 module.exports = {
-  createPaymentRequest: createPaymentRequest,
-  doPaymentCall: doPaymentCall,
-  doPaymentDetailsCall: doPaymentDetailsCall,
+  createPaymentRequest,
+  doPaymentCall,
+  doPaymentDetailsCall,
 };

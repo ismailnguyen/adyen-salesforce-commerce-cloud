@@ -9,7 +9,7 @@ const URLUtils = require('dw/web/URLUtils');
 const adyenCurrentSite = dwsystem.Site.getCurrent();
 
 /* eslint no-var: off */
-var adyenHelperObj = {
+var __AdyenHelper = {
   // service constants
   SERVICE: {
     PAYMENT: 'AdyenPayment',
@@ -32,30 +32,30 @@ var adyenHelperObj = {
   ADYEN_LIVE_URL: 'https://live.adyen.com/',
   ADYEN_TEST_URL: 'https://test.adyen.com/',
   LOADING_CONTEXT_TEST:
-    'https://checkoutshopper-test.adyen.com/checkoutshopper/',
+      'https://checkoutshopper-test.adyen.com/checkoutshopper/',
   LOADING_CONTEXT_LIVE:
-    'https://checkoutshopper-live.adyen.com/checkoutshopper/',
+      'https://checkoutshopper-live.adyen.com/checkoutshopper/',
 
   CHECKOUT_COMPONENT_VERSION: '3.9.4',
-  VERSION: '20.1.2',
+  VERSION: '20.1.0',
 
-  getService: function (service) {
+  getService(service) {
     // Create the service config (used for all services)
     var adyenService = null;
 
     try {
       adyenService = dwsvc.LocalServiceRegistry.createService(service, {
-        createRequest: function (svc, args) {
+        createRequest(svc, args) {
           svc.setRequestMethod('POST');
           if (args) {
             return args;
           }
           return null;
         },
-        parseResponse: function (svc, client) {
+        parseResponse(svc, client) {
           return client;
         },
-        filterLogMessage: function (msg) {
+        filterLogMessage(msg) {
           return msg;
         },
       });
@@ -73,7 +73,7 @@ var adyenHelperObj = {
     return adyenService;
   },
 
-  getCustomPreference: function (field) {
+  getCustomPreference(field) {
     let customPreference = null;
     if (adyenCurrentSite && adyenCurrentSite.getCustomPreferenceValue(field)) {
       customPreference = adyenCurrentSite.getCustomPreferenceValue(field);
@@ -81,48 +81,61 @@ var adyenHelperObj = {
     return customPreference;
   },
 
-  getAdyenEnvironment: function () {
-    return adyenHelperObj.getCustomPreference('Adyen_Mode').value;
+  getAdyenEnvironment() {
+    return __AdyenHelper.getCustomPreference('Adyen_Mode').value;
   },
 
-  getAdyenMerchantAccount: function () {
-    return adyenHelperObj.getCustomPreference('Adyen_merchantCode');
+  getAdyenMerchantAccount() {
+    return __AdyenHelper.getCustomPreference('Adyen_merchantCode');
   },
 
-  getAdyenSecuredFieldsEnabled: function () {
-    return adyenHelperObj.getCustomPreference('AdyenSecuredFieldsEnabled');
+  getAdyenUrl() {
+    let returnValue = '';
+    switch (__AdyenHelper.getAdyenEnvironment()) {
+      case __AdyenHelper.MODE.TEST:
+        returnValue = __AdyenHelper.ADYEN_TEST_URL;
+        break;
+      case __AdyenHelper.MODE.LIVE:
+        returnValue = __AdyenHelper.ADYEN_LIVE_URL;
+        break;
+    }
+    return returnValue;
   },
 
-  getAdyen3DS2Enabled: function () {
-    return adyenHelperObj.getCustomPreference('Adyen3DS2Enabled');
+  getAdyenSecuredFieldsEnabled() {
+    return __AdyenHelper.getCustomPreference('AdyenSecuredFieldsEnabled');
   },
 
-  getAdyenRecurringPaymentsEnabled: function () {
+  getAdyen3DS2Enabled() {
+    return __AdyenHelper.getCustomPreference('Adyen3DS2Enabled');
+  },
+
+  getAdyenRecurringPaymentsEnabled() {
     let returnValue = false;
     if (
       !empty(adyenCurrentSite)
-      && (adyenCurrentSite.getCustomPreferenceValue('AdyenRecurringEnabled')
-        || adyenCurrentSite.getCustomPreferenceValue('AdyenOneClickEnabled'))
+        && (adyenCurrentSite.getCustomPreferenceValue('AdyenRecurringEnabled')
+            || adyenCurrentSite.getCustomPreferenceValue('AdyenOneClickEnabled'))
     ) {
       returnValue = true;
     }
     return returnValue;
   },
 
-  getAdyenGivingConfig: function (order) {
+  getAdyenGivingConfig(order) {
     const paymentMethod = order.custom.Adyen_paymentMethod;
     let adyenGivingAvailable = false;
     if (
-      adyenHelperObj.getAdyenGivingEnabled()
-      && adyenHelperObj.isAdyenGivingAvailable(paymentMethod)
+      __AdyenHelper.getAdyenGivingEnabled()
+        && __AdyenHelper.isAdyenGivingAvailable(paymentMethod)
     ) {
       adyenGivingAvailable = true;
-      var configuredAmounts = adyenHelperObj.getDonationAmounts();
-      var charityName = adyenHelperObj.getAdyenGivingCharityName();
-      var charityWebsite = adyenHelperObj.getAdyenGivingCharityWebsite();
-      var charityDescription = adyenHelperObj.getAdyenGivingCharityDescription();
-      var adyenGivingBackgroundUrl = adyenHelperObj.getAdyenGivingBackgroundUrl();
-      var adyenGivingLogoUrl = adyenHelperObj.getAdyenGivingLogoUrl();
+      var configuredAmounts = __AdyenHelper.getDonationAmounts();
+      var charityName = __AdyenHelper.getAdyenGivingCharityName();
+      var charityWebsite = __AdyenHelper.getAdyenGivingCharityWebsite();
+      var charityDescription = __AdyenHelper.getAdyenGivingCharityDescription();
+      var adyenGivingBackgroundUrl = __AdyenHelper.getAdyenGivingBackgroundUrl();
+      var adyenGivingLogoUrl = __AdyenHelper.getAdyenGivingLogoUrl();
 
       var donationAmounts = {
         currency: session.currency.currencyCode,
@@ -130,78 +143,70 @@ var adyenHelperObj = {
       };
     }
     return {
-      adyenGivingAvailable: adyenGivingAvailable,
-      configuredAmounts: configuredAmounts,
-      charityName: charityName,
-      charityWebsite: charityWebsite,
-      charityDescription: charityDescription,
-      adyenGivingBackgroundUrl: adyenGivingBackgroundUrl,
-      adyenGivingLogoUrl: adyenGivingLogoUrl,
+      adyenGivingAvailable,
+      configuredAmounts,
+      charityName,
+      charityWebsite,
+      charityDescription,
+      adyenGivingBackgroundUrl,
+      adyenGivingLogoUrl,
       donationAmounts: JSON.stringify(donationAmounts),
       pspReference: order.custom.Adyen_pspReference,
     };
   },
 
-  getAdyenRecurringEnabled: function () {
-    return adyenHelperObj.getCustomPreference('AdyenRecurringEnabled');
+  getAdyenRecurringEnabled() {
+    return __AdyenHelper.getCustomPreference('AdyenRecurringEnabled');
   },
 
-  getAdyenOneClickEnabled: function () {
-    return adyenHelperObj.getCustomPreference('AdyenOneClickEnabled');
+  getAdyenOneClickEnabled() {
+    return __AdyenHelper.getCustomPreference('AdyenOneClickEnabled');
   },
 
-  getCreditCardInstallments: function () {
-    return adyenHelperObj.getCustomPreference('AdyenCreditCardInstallments');
+  getCreditCardInstallments() {
+    return __AdyenHelper.getCustomPreference('AdyenCreditCardInstallments');
   },
 
-  getPaypalMerchantID: function () {
-    return adyenHelperObj.getCustomPreference('Adyen_PaypalMerchantID');
+  getPaypalMerchantID() {
+    return __AdyenHelper.getCustomPreference('Adyen_PaypalMerchantID');
   },
 
-  getGoogleMerchantID: function () {
-    return adyenHelperObj.getCustomPreference('Adyen_GooglePayMerchantID');
+  getGoogleMerchantID() {
+    return __AdyenHelper.getCustomPreference('Adyen_GooglePayMerchantID');
   },
 
-  getAdyenStoreId: function () {
-    return adyenHelperObj.getCustomPreference('Adyen_StoreId');
+  getAdyenStoreId() {
+    return __AdyenHelper.getCustomPreference('Adyen_StoreId');
   },
 
-  getAdyenApiKey: function () {
-    return adyenHelperObj.getCustomPreference('Adyen_API_Key');
+  getAdyenApiKey() {
+    return __AdyenHelper.getCustomPreference('Adyen_API_Key');
   },
 
-  getCheckoutUrl: function () {
-    const checkoutUrl = `${this.getLoadingContext()
-    }sdk/${
-      adyenHelperObj.CHECKOUT_COMPONENT_VERSION
-    }/adyen.js`;
-    return checkoutUrl;
+  getCheckoutUrl() {
+    const checkoutUrl = this.getLoadingContext();
+    return `${checkoutUrl}sdk/${__AdyenHelper.CHECKOUT_COMPONENT_VERSION}/adyen.js`;
   },
 
-  getCheckoutCSS: function () {
-    const checkoutCSS = `${this.getLoadingContext()
-    }sdk/${
-      adyenHelperObj.CHECKOUT_COMPONENT_VERSION
-    }/adyen.css`;
-    return checkoutCSS;
+  getCheckoutCSS() {
+    const checkoutCSS = this.getLoadingContext();
+    return `${checkoutCSS}sdk/${__AdyenHelper.CHECKOUT_COMPONENT_VERSION}/adyen.css`;
   },
 
-  getLoadingContext: function () {
+  getLoadingContext() {
     let returnValue = '';
-    /* eslint default-case: ["error", { "commentPattern": "^skip\\sdefault" }] */
-    switch (adyenHelperObj.getAdyenEnvironment()) {
-      case adyenHelperObj.MODE.TEST:
-        returnValue = adyenHelperObj.LOADING_CONTEXT_TEST;
+    switch (__AdyenHelper.getAdyenEnvironment()) {
+      case __AdyenHelper.MODE.TEST:
+        returnValue = __AdyenHelper.LOADING_CONTEXT_TEST;
         break;
-      case adyenHelperObj.MODE.LIVE:
-        returnValue = adyenHelperObj.LOADING_CONTEXT_LIVE;
+      case __AdyenHelper.MODE.LIVE:
+        returnValue = __AdyenHelper.LOADING_CONTEXT_LIVE;
         break;
-        // skip default
     }
     return returnValue;
   },
 
-  getAdyenHash: function (value, salt) {
+  getAdyenHash(value, salt) {
     const data = value + salt;
     const Bytes = require('dw/util/Bytes');
     const MessageDigest = require('dw/crypto/MessageDigest');
@@ -214,45 +219,39 @@ var adyenHelperObj = {
     return signature;
   },
 
-  getAdyenBasketFieldsEnabled: function () {
-    return adyenHelperObj.getCustomPreference('AdyenBasketFieldsEnabled');
+  getAdyenBasketFieldsEnabled() {
+    return __AdyenHelper.getCustomPreference('AdyenBasketFieldsEnabled');
   },
 
-  getAdyenLevel23DataEnabled: function () {
-    return adyenHelperObj.getCustomPreference('AdyenLevel23DataEnabled');
+  getAdyenGivingEnabled() {
+    return __AdyenHelper.getCustomPreference('AdyenGiving_enabled');
   },
 
-  getAdyenLevel23CommodityCode: function () {
-    return adyenHelperObj.getCustomPreference('AdyenLevel23_CommodityCode');
+  getAdyenGivingCharityAccount() {
+    return __AdyenHelper.getCustomPreference('AdyenGiving_charityAccount');
   },
 
-  getAdyenGivingEnabled: function () {
-    return adyenHelperObj.getCustomPreference('AdyenGiving_enabled');
+  getAdyenGivingCharityName() {
+    return __AdyenHelper.getCustomPreference('AdyenGiving_charityName');
   },
 
-  getAdyenGivingCharityAccount: function () {
-    return adyenHelperObj.getCustomPreference('AdyenGiving_charityAccount');
+  getAdyenGivingCharityDescription() {
+    return __AdyenHelper.getCustomPreference('AdyenGiving_charityDescription');
   },
 
-  getAdyenGivingCharityName: function () {
-    return adyenHelperObj.getCustomPreference('AdyenGiving_charityName');
+  getAdyenGivingCharityWebsite() {
+    return __AdyenHelper.getCustomPreference('AdyenGiving_charityUrl');
   },
 
-  getAdyenGivingCharityDescription: function () {
-    return adyenHelperObj.getCustomPreference('AdyenGiving_charityDescription');
-  },
-
-  getAdyenGivingCharityWebsite: function () {
-    return adyenHelperObj.getCustomPreference('AdyenGiving_charityUrl');
-  },
-
-  getDonationAmounts: function () {
+  getDonationAmounts() {
     let returnValue = [];
     if (
       !empty(adyenCurrentSite)
-      && !empty(
-        adyenCurrentSite.getCustomPreferenceValue('AdyenGiving_donationAmounts'),
-      )
+        && !empty(
+          adyenCurrentSite.getCustomPreferenceValue(
+            'AdyenGiving_donationAmounts',
+          ),
+        )
     ) {
       const configuredValue = adyenCurrentSite.getCustomPreferenceValue(
         'AdyenGiving_donationAmounts',
@@ -260,9 +259,7 @@ var adyenHelperObj = {
       const configuredAmountArray = configuredValue.split(',');
       const amountArray = [];
       for (let i = 0; i < configuredAmountArray.length; i++) {
-        /* eslint radix: ["error", "as-needed"] */
         const amount = parseInt(configuredAmountArray[i]);
-        // eslint-disable-next-line no-restricted-globals
         if (!isNaN(amount)) {
           amountArray.push(amount);
         }
@@ -272,17 +269,17 @@ var adyenHelperObj = {
     return returnValue;
   },
 
-  getAdyenGivingBackgroundUrl: function () {
-    return adyenHelperObj
+  getAdyenGivingBackgroundUrl() {
+    return __AdyenHelper
       .getCustomPreference('AdyenGiving_backgroundUrl')
       .getAbsURL();
   },
 
-  getAdyenGivingLogoUrl: function () {
-    return adyenHelperObj.getCustomPreference('AdyenGiving_logoUrl').getAbsURL();
+  getAdyenGivingLogoUrl() {
+    return __AdyenHelper.getCustomPreference('AdyenGiving_logoUrl').getAbsURL();
   },
 
-  isAdyenGivingAvailable: function (paymentMethod) {
+  isAdyenGivingAvailable(paymentMethod) {
     const availablePaymentMethods = [
       'visa',
       'mc',
@@ -303,11 +300,11 @@ var adyenHelperObj = {
     return availablePaymentMethods.indexOf(paymentMethod) !== -1;
   },
 
-  getRatePayID: function () {
+  getRatePayID() {
     const returnValue = {};
     if (
       adyenCurrentSite
-      && adyenCurrentSite.getCustomPreferenceValue('AdyenRatePayID')
+        && adyenCurrentSite.getCustomPreferenceValue('AdyenRatePayID')
     ) {
       returnValue.ratePayId = adyenCurrentSite.getCustomPreferenceValue(
         'AdyenRatePayID',
@@ -315,7 +312,7 @@ var adyenHelperObj = {
     }
     if (
       !session.privacy.ratePayFingerprint
-      || session.privacy.ratePayFingerprint === null
+        || session.privacy.ratePayFingerprint === null
     ) {
       returnValue.sessionID = new dw.crypto.MessageDigest(
         dw.crypto.MessageDigest.DIGEST_SHA_256,
@@ -325,14 +322,14 @@ var adyenHelperObj = {
     return returnValue;
   },
 
-  isOpenInvoiceMethod: function (paymentMethod) {
+  isOpenInvoiceMethod(paymentMethod) {
     if (
       paymentMethod.indexOf('afterpay') > -1
-      || paymentMethod.indexOf('klarna') > -1
-      || paymentMethod.indexOf('ratepay') > -1
-      || paymentMethod.indexOf('facilypay') > -1
-      || paymentMethod === 'zip'
-      || paymentMethod === 'affirm'
+        || paymentMethod.indexOf('klarna') > -1
+        || paymentMethod.indexOf('ratepay') > -1
+        || paymentMethod.indexOf('facilypay') > -1
+        || paymentMethod === 'zip'
+        || paymentMethod === 'affirm'
         || paymentMethod === 'clearpay'
     ) {
       return true;
@@ -340,7 +337,7 @@ var adyenHelperObj = {
     return false;
   },
 
-  isMolpayMethod: function (paymentMethod) {
+  isMolpayMethod(paymentMethod) {
     if (paymentMethod.indexOf('molpay') > -1) {
       return true;
     }
@@ -349,7 +346,7 @@ var adyenHelperObj = {
   },
 
   // Get saved card token of customer saved card based on matched cardUUID
-  getCardToken: function (cardUUID, customer) {
+  getCardToken(cardUUID, customer) {
     let token = '';
     if (customer && customer.authenticated && cardUUID) {
       const wallet = customer.getProfile().getWallet();
@@ -361,7 +358,7 @@ var adyenHelperObj = {
         // find token ID exists for matching payment card
         if (
           creditCardInstrument.UUID.equals(cardUUID)
-          && creditCardInstrument.getCreditCardToken()
+            && creditCardInstrument.getCreditCardToken()
         ) {
           token = creditCardInstrument.getCreditCardToken();
           break;
@@ -371,17 +368,20 @@ var adyenHelperObj = {
     return token;
   },
 
-  createShopperObject: function (args) {
+  createShopperObject(args) {
     let gender = 'UNKNOWN';
     if (
       args.paymentRequest.shopperName
-      && args.paymentRequest.shopperName.gender
+        && args.paymentRequest.shopperName.gender
     ) {
       gender = args.paymentRequest.shopperName.gender;
     }
 
     if (args.order.getDefaultShipment().getShippingAddress().getPhone()) {
-      args.paymentRequest.telephoneNumber = args.order.getDefaultShipment().getShippingAddress().getPhone();
+      args.paymentRequest.telephoneNumber = args.order
+        .getDefaultShipment()
+        .getShippingAddress()
+        .getPhone();
     }
 
     const customer = args.order.getCustomer();
@@ -398,7 +398,7 @@ var adyenHelperObj = {
 
     const shopperDetails = {
       firstName: args.order.getBillingAddress().firstName,
-      gender: gender,
+      gender,
       infix: '',
       lastName: args.order.getBillingAddress().lastName,
     };
@@ -424,8 +424,8 @@ var adyenHelperObj = {
     return args.paymentRequest;
   },
 
-  createAddressObjects: function (order, paymentMethod, paymentRequest) {
-    const shippingAddress = order.defaultShipment.shippingAddress;
+  createAddressObjects(order, paymentMethod, paymentRequest) {
+    const { shippingAddress } = order.defaultShipment;
     paymentRequest.countryCode = shippingAddress.countryCode.value.toUpperCase();
 
     let shippingStreet = '';
@@ -490,26 +490,30 @@ var adyenHelperObj = {
     return paymentRequest;
   },
 
-  createAdyenRequestObject: function (order, paymentInstrument) {
+  createAdyenRequestObject(order, paymentInstrument) {
     const jsonObject = JSON.parse(paymentInstrument.custom.adyenPaymentData);
-    const filteredJson = adyenHelperObj.validateStateData(jsonObject);
-    const stateData = filteredJson.stateData;
+    const filteredJson = __AdyenHelper.validateStateData(jsonObject);
+    const { stateData } = filteredJson;
 
     let reference = 'recurringPayment-account';
     if (order && order.getOrderNo()) {
       reference = order.getOrderNo();
     }
 
-    stateData.merchantAccount = adyenHelperObj.getAdyenMerchantAccount();
+    stateData.merchantAccount = __AdyenHelper.getAdyenMerchantAccount();
     stateData.reference = reference;
-    stateData.returnUrl = URLUtils.https('Adyen-ShowConfirmation').toString();
-    stateData.applicationInfo = adyenHelperObj.getApplicationInfo(true);
-    stateData.enableRecurring = adyenHelperObj.getAdyenRecurringEnabled();
+    stateData.returnUrl = URLUtils.https(
+      'Adyen-ShowConfirmation',
+      'merchantReference',
+      reference,
+    ).toString();
+    stateData.applicationInfo = __AdyenHelper.getApplicationInfo(true);
+    stateData.enableRecurring = __AdyenHelper.getAdyenRecurringEnabled();
     stateData.additionalData = {};
     return stateData;
   },
 
-  add3DS2Data: function (jsonObject) {
+  add3DS2Data(jsonObject) {
     jsonObject.additionalData.allow3DS2 = true;
     jsonObject.channel = 'web';
 
@@ -520,7 +524,7 @@ var adyenHelperObj = {
     return jsonObject;
   },
 
-  getAdyenCardType: function (cardType) {
+  getAdyenCardType(cardType) {
     if (!empty(cardType)) {
       switch (cardType) {
         case 'Visa':
@@ -565,7 +569,7 @@ var adyenHelperObj = {
     return cardType;
   },
 
-  getSFCCCardType: function (cardType) {
+  getSFCCCardType(cardType) {
     if (!empty(cardType)) {
       switch (cardType) {
         case 'visa':
@@ -607,7 +611,7 @@ var adyenHelperObj = {
     );
   },
 
-  savePaymentDetails: function (paymentInstrument, order, result) {
+  savePaymentDetails(paymentInstrument, order, result) {
     if (result.pspReference) {
       paymentInstrument.paymentTransaction.transactionID = result.pspReference;
       order.custom.Adyen_pspReference = result.pspReference;
@@ -633,15 +637,15 @@ var adyenHelperObj = {
     return true;
   },
 
-  getCurrencyValueForApi: function (amount) {
+  getCurrencyValueForApi(amount) {
     const currencyCode = dwutil.Currency.getCurrency(amount.currencyCode);
-    const digitsNumber = adyenHelperObj.getFractionDigits(
+    const digitsNumber = __AdyenHelper.getFractionDigits(
       currencyCode.toString(),
     );
-    return Math.round(amount.multiply(Math.pow(10, digitsNumber)).value); // eslint-disable-line no-restricted-properties
+    return Math.round(amount.multiply(Math.pow(10, digitsNumber)).value);
   },
 
-  getFractionDigits: function (currencyCode) {
+  getFractionDigits(currencyCode) {
     let format;
     switch (currencyCode) {
       case 'CVE':
@@ -677,11 +681,12 @@ var adyenHelperObj = {
     return format;
   },
 
-  getApplicationInfo: function (isEcom) {
+  getApplicationInfo(isEcom) {
     let externalPlatformVersion = '';
     const applicationInfo = {};
     try {
-      // AdyenController can be coming either from int_adyen_controllers or int_adyen_SFRA, depending on the cartridge path
+      // AdyenController can be coming either from int_adyen_controllers
+      // or int_adyen_SFRA, depending on the cartridge path
       const AdyenController = require('*/cartridge/controllers/Adyen.js');
       externalPlatformVersion = AdyenController.getExternalPlatformVersion;
     } catch (e) {
@@ -690,7 +695,7 @@ var adyenHelperObj = {
 
     applicationInfo.merchantApplication = {
       name: 'adyen-salesforce-commerce-cloud',
-      version: adyenHelperObj.VERSION,
+      version: __AdyenHelper.VERSION,
     };
 
     applicationInfo.externalPlatform = {
@@ -701,13 +706,13 @@ var adyenHelperObj = {
     if (isEcom) {
       applicationInfo.adyenPaymentSource = {
         name: 'adyen-salesforce-commerce-cloud',
-        version: adyenHelperObj.VERSION,
+        version: __AdyenHelper.VERSION,
       };
     }
     return applicationInfo;
   },
 
-  validateStateData: function (stateData) {
+  validateStateData(stateData) {
     const validFields = [
       'paymentMethod',
       'billingAddress',
@@ -736,8 +741,8 @@ var adyenHelperObj = {
         filteredStateData[keyName] = stateData[keyName];
       }
     }
-    return { stateData: filteredStateData, invalidFields: invalidFields };
+    return { stateData: filteredStateData, invalidFields };
   },
 };
 
-module.exports = adyenHelperObj;
+module.exports = __AdyenHelper;

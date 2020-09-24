@@ -93,7 +93,7 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
-             <attribute-definition attribute-id="adyenAction">
+            <attribute-definition attribute-id="adyenAction">
                 <display-name xml:lang="x-default">adyenAction</display-name>
                 <description xml:lang="x-default">Action data from payment response</description>
                 <type>string</type>
@@ -111,44 +111,51 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
+            <attribute-definition attribute-id="adyenMD">
+                <display-name xml:lang="x-default">adyenMD</display-name>
+                <description xml:lang="x-default">Adyen MD for 3D Secure</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="AdyenPayment">
                 <display-name xml:lang="x-default">AdyenPayment</display-name>
                 <attribute attribute-id="adyenIssuerName"/>
                 <attribute attribute-id="adyenPaymentMethod"/>
-                <attribute attribute-id="adyenPaymentData"/>
             </attribute-group>
         </group-definitions>
     </type-extension>
 
     <type-extension type-id="CustomerPaymentInstrument">
-            <custom-attribute-definitions>
-                <attribute-definition attribute-id="adyenCreditCardType">
-                    <display-name xml:lang="x-default">adyenCreditCardType</display-name>
-                    <description xml:lang="x-default">Adyen Credit card type</description>
-                    <type>string</type>
-                    <mandatory-flag>false</mandatory-flag>
-                    <externally-managed-flag>false</externally-managed-flag>
-                    <min-length>0</min-length>
-                </attribute-definition>
-                <attribute-definition attribute-id="adyenPaymentData">
-                    <display-name xml:lang="x-default">adyenPaymentData</display-name>
-                    <description xml:lang="x-default">adyenPaymentData</description>
-                    <type>text</type>
-                    <mandatory-flag>false</mandatory-flag>
-                    <externally-managed-flag>false</externally-managed-flag>
-                    <min-length>0</min-length>
-                    <field-length>0</field-length>
-                </attribute-definition>
-            </custom-attribute-definitions>
-            <group-definitions>
-                <attribute-group group-id="AdyenPayment">
-                    <display-name xml:lang="x-default">AdyenPayment</display-name>
-                    <attribute attribute-id="adyenCreditCardType"/>
-                    <attribute attribute-id="adyenPaymentData"/>
-                </attribute-group>
-            </group-definitions>
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="adyenCreditCardType">
+                <display-name xml:lang="x-default">adyenCreditCardType</display-name>
+                <description xml:lang="x-default">Adyen Credit card type</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="adyenPaymentData">
+                <display-name xml:lang="x-default">adyenPaymentData</display-name>
+                <description xml:lang="x-default">adyenPaymentData</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <field-length>0</field-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="AdyenPayment">
+                <display-name xml:lang="x-default">AdyenPayment</display-name>
+                <attribute attribute-id="adyenCreditCardType"/>
+            </attribute-group>
+        </group-definitions>
     </type-extension>
 
     <type-extension type-id="PaymentTransaction">
@@ -244,43 +251,43 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_merchantReference">
+            <attribute-definition attribute-id="Adyen_merchantReference">
                 <display-name xml:lang="x-default">Adyen_merchantReference</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_merchantReturnData">
+            <attribute-definition attribute-id="Adyen_merchantReturnData">
                 <display-name xml:lang="x-default">Adyen_merchantReturnData</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_merchantSig">
+            <attribute-definition attribute-id="Adyen_merchantSig">
                 <display-name xml:lang="x-default">Adyen_merchantSig</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_paymentMethod">
+            <attribute-definition attribute-id="Adyen_paymentMethod">
                 <display-name xml:lang="x-default">Adyen_paymentMethod</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_pspReference">
+            <attribute-definition attribute-id="Adyen_pspReference">
                 <display-name xml:lang="x-default">Adyen_pspReference</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_shopperLocale">
+            <attribute-definition attribute-id="Adyen_shopperLocale">
                 <display-name xml:lang="x-default">Adyen_shopperLocale</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_skinCode">
+            <attribute-definition attribute-id="Adyen_skinCode">
                 <display-name xml:lang="x-default">Adyen_skinCode</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
@@ -288,7 +295,6 @@
             </attribute-definition>
         </custom-attribute-definitions>
     </type-extension>
-
 
     <type-extension type-id="SitePreferences">
         <custom-attribute-definitions>
@@ -344,19 +350,6 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <default-value>true</default-value>
             </attribute-definition>
-            <attribute-definition attribute-id="AdyenLevel23DataEnabled">
-                <display-name xml:lang="x-default">Level 2/3 Data Authorisation Enabled</display-name>
-                <type>boolean</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <default-value>true</default-value>
-            </attribute-definition>
-            <attribute-definition attribute-id="AdyenLevel23_CommodityCode">
-                <display-name xml:lang="x-default">Commodity Code that best describes your products (only applicable for Level 2/3 Data Authorisation) https://www.unspsc.org/search-code</display-name>
-                <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
             <attribute-definition attribute-id="Adyen_Mode">
                 <display-name xml:lang="x-default">Test/Production Mode</display-name>
                 <description xml:lang="x-default">Set to live for Production or test for test mode</description>
@@ -406,7 +399,7 @@
                 <min-length>0</min-length>
                 <field-length>0</field-length>
             </attribute-definition>
-             <attribute-definition attribute-id="Adyen_API_Key">
+            <attribute-definition attribute-id="Adyen_API_Key">
                 <display-name xml:lang="x-default">X-API-KEY of Web service</display-name>
                 <description xml:lang="x-default">X-API-KEY of Web service</description>
                 <type>password</type>
@@ -505,9 +498,7 @@
                 <attribute attribute-id="AdyenOneClickEnabled"/>
                 <attribute attribute-id="AdyenCreditCardInstallments"/>
                 <attribute attribute-id="AdyenBasketFieldsEnabled"/>
-                <attribute attribute-id="AdyenLevel23DataEnabled"/>
-                <attribute attribute-id="AdyenLevel23_CommodityCode"/>
-	            <attribute attribute-id="Adyen_notification_user"/>
+                <attribute attribute-id="Adyen_notification_user"/>
                 <attribute attribute-id="Adyen_notification_password"/>
                 <attribute attribute-id="Adyen_PaypalMerchantID"/>
                 <attribute attribute-id="Adyen_GooglePayMerchantID"/>
@@ -523,5 +514,5 @@
                 <attribute attribute-id="AdyenGiving_logoUrl"/>
             </attribute-group>
         </group-definitions>
-</type-extension>
+    </type-extension>
 </metadata>
