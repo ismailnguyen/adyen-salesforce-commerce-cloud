@@ -91,6 +91,7 @@ function showConfirmation() {
       paymentData,
     };
     const result = adyenCheckout.doPaymentDetailsCall(requestObject);
+
     clearAdyenData(adyenPaymentInstrument);
     if (result.invalidRequest) {
       Logger.getLogger('Adyen').error('Invalid /payments/details call');
@@ -125,8 +126,12 @@ function showConfirmation() {
       }
       order = OrderMgr.getOrder(result.merchantReference);
 
+      const paymentInstrument = order.getPaymentInstruments(
+          constants.METHOD_ADYEN_COMPONENT,
+      )[0];
+
       Transaction.wrap(() => {
-        AdyenHelper.savePaymentDetails(adyenPaymentInstrument, order, result);
+        AdyenHelper.savePaymentDetails(paymentInstrument, order, result);
       });
       OrderModel.submit(order);
       clearForms();
