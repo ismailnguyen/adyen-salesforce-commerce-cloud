@@ -36,7 +36,7 @@ var AdyenHelper = require('*/cartridge/scripts/util/AdyenHelper');
 var AdyenGetOpenInvoiceData = require('*/cartridge/scripts/adyenGetOpenInvoiceData');
 
 function execute(args) {
-    return PIPELET_NEXT;  
+    return PIPELET_NEXT;
 }
 
 function alternativePaymentMethod(args){
@@ -47,8 +47,8 @@ function alternativePaymentMethod(args){
         paymentMethodObject['issuer'] = args.adyenForm.issuer.value;
     }
 
-   var returnUrl = URLUtils.https('Adyen-ShowConfirmation').toString();
-   return createPaymentRequest(args, paymentMethodObject, returnUrl); 
+   var returnUrl = URLUtils.https('Adyen-ShowConfirmation', 'merchantReference', args.OrderNo).toString();
+   return createPaymentRequest(args, paymentMethodObject, returnUrl);
 }
 
 function creditCard(args) {
@@ -308,7 +308,8 @@ function doPaymentDetailsCall(requestObject){
     if (callResult.isOk() == false){
         Logger.getLogger("Adyen").error('Adyen: Call error code' +  callResult.getError().toString() + ' Error => ResponseStatus: ' + callResult.getStatus()  + ' | ResponseErrorText: ' +  callResult.getErrorMessage() + ' | ResponseText: ' + callResult.getMsg());
         return {
-            error: true
+            error: true,
+            invalidRequest: true,
         };
     }
     var resultObject = callResult.object;

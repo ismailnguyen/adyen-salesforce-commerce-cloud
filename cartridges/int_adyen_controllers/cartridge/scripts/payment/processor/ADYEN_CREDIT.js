@@ -88,14 +88,20 @@ function Authorize(args) {
             paymentInstrument.custom.adyenPaymentData = result.PaymentData;
         });
 
-        session.privacy.orderNo = order.orderNo;
-        session.privacy.paymentMethod = paymentInstrument.paymentMethod;
+        // session.privacy.orderNo = order.orderNo;
+        // session.privacy.paymentMethod = paymentInstrument.paymentMethod;
 
         return {
             authorized: true,
             authorized3d: true,
             view : app.getView({
-            	ContinueURL: URLUtils.https('Adyen-Redirect3DS2', 'utm_nooverride', '1'),
+            	ContinueURL: URLUtils.https(
+            	    'Adyen-Redirect3DS2',
+                    'merchantReference',
+                    order.orderNo,
+                    'utm_nooverride',
+                    '1'
+                ),
             	resultCode: result.resultCode,
                 token3ds2: result.token3ds2
             })
@@ -104,20 +110,29 @@ function Authorize(args) {
 
     if(result.RedirectObject != ''){
 	    if(result.RedirectObject.url && result.RedirectObject.data.PaReq && result.RedirectObject.data.MD){
+            // Transaction.wrap(() => {
+                paymentInstrument.custom.adyenMD = result.redirectObject.data.MD;
+            // });
 	        Transaction.commit();
+
 	        if(result.PaymentData){
 	            Transaction.wrap( function() {
 	            	paymentInstrument.custom.adyenPaymentData = result.PaymentData;
 	            });
 	        }
-            session.privacy.orderNo = order.orderNo;
-            session.privacy.paymentMethod = paymentInstrument.paymentMethod;
+            // session.privacy.orderNo = order.orderNo;
+            // session.privacy.paymentMethod = paymentInstrument.paymentMethod;
+
 	        return {
 	            authorized: true,
 	            authorized3d: true,
 	            redirectObject: result.RedirectObject,
 	            view: app.getView({
-	                ContinueURL: URLUtils.https('Adyen-CloseThreeDS', 'utm_nooverride', '1'),
+	                ContinueURL: URLUtils.https(
+	                    'Adyen-CloseThreeDS',
+                        order.orderNo,
+                        'utm_nooverride',
+                        '1'),
 	                Basket: order,
 	                issuerUrl : result.RedirectObject.url,
 	                paRequest : result.RedirectObject.data.PaReq,
