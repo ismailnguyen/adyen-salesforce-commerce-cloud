@@ -111,7 +111,7 @@ function Authorize(args) {
     if(result.RedirectObject != ''){
 	    if(result.RedirectObject.url && result.RedirectObject.data.PaReq && result.RedirectObject.data.MD){
             // Transaction.wrap(() => {
-                paymentInstrument.custom.adyenMD = result.redirectObject.data.MD;
+                paymentInstrument.custom.adyenMD = result.RedirectObject.data.MD;
             // });
 	        Transaction.commit();
 
@@ -120,9 +120,6 @@ function Authorize(args) {
 	            	paymentInstrument.custom.adyenPaymentData = result.PaymentData;
 	            });
 	        }
-            // session.privacy.orderNo = order.orderNo;
-            // session.privacy.paymentMethod = paymentInstrument.paymentMethod;
-
 	        return {
 	            authorized: true,
 	            authorized3d: true,
@@ -130,13 +127,17 @@ function Authorize(args) {
 	            view: app.getView({
 	                ContinueURL: URLUtils.https(
 	                    'Adyen-CloseThreeDS',
+                        'merchantReference',
                         order.orderNo,
+                        'MD',
+                        result.RedirectObject.data.MD,
                         'utm_nooverride',
                         '1'),
 	                Basket: order,
 	                issuerUrl : result.RedirectObject.url,
 	                paRequest : result.RedirectObject.data.PaReq,
-	                md : result.RedirectObject.data.MD
+	                MD : result.RedirectObject.data.MD,
+                    test: 'test'
 	            })};
 	    }
 	    else{

@@ -5,6 +5,8 @@ var dwsvc = require("dw/svc");
 var dwnet = require("dw/net");
 var dwsystem = require("dw/system");
 var dwutil = require("dw/util");
+var Logger = require('dw/system/Logger');
+
 var adyenCurrentSite = dwsystem.Site.getCurrent();
 var __AdyenHelper: Object = {
 
@@ -594,9 +596,9 @@ var __AdyenHelper: Object = {
         }
 
         var browserInfo = JSON.parse(card.browserInfo.value);
-        browserInfo['acceptHeader'] = request.httpHeaders.get('accept') + request.httpHeaders.get('accept-encoding');
-        browserInfo['userAgent'] = request.httpUserAgent;
-        jsonObject["browserInfo"] = browserInfo;
+        // browserInfo['acceptHeader'] = request.httpHeaders.get('accept') + request.httpHeaders.get('accept-encoding');
+        // browserInfo['userAgent'] = request.httpUserAgent;
+        // jsonObject["browserInfo"] = browserInfo;
 
         var origin = request.getHttpProtocol() + "://" + request.getHttpHost();
 
