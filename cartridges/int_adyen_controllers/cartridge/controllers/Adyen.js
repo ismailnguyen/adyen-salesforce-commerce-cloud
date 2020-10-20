@@ -113,7 +113,7 @@ function showConfirmation() {
         return response.redirect(URLUtils.httpHome());
     }
     var merchantRefOrder = OrderMgr.getOrder(result.merchantReference);
-    Logger.getLogger('Adyen').error('result merchant ref + ' + JSON.stringify(result.merchantReference))
+    Logger.getLogger('Adyen').error('result for showConfirmation + ' + JSON.stringify(result));
     var paymentInstrument;
     if(merchantRefOrder) {
          paymentInstrument = merchantRefOrder.getPaymentInstruments('Adyen')[0];
@@ -434,7 +434,8 @@ function authorizeWithForm() {
         // Save full response to transaction custom attribute
         paymentInstrument.paymentTransaction.custom.Adyen_log = JSON.stringify(result);
 
-        order = OrderMgr.getOrder(result.merchantReference);
+        var merchantRef = result.additionalData.merchantReference || orderNo;
+        order = OrderMgr.getOrder(merchantRef);
         order.setPaymentStatus(dw.order.Order.PAYMENT_STATUS_PAID);
         order.setExportStatus(dw.order.Order.EXPORT_STATUS_READY);
         paymentInstrument.custom.adyenPaymentData = null;
@@ -463,8 +464,6 @@ function closeThreeDS() {
 	// 		PaRes : request.httpParameterMap.get("PaRes").stringValue
 	// }
 	var orderNo = request.httpParameterMap.get("merchantReference").stringValue;
-	Logger.getLogger('Adyen').error('close3ds orderNo is ... ' + orderNo);
-    Logger.getLogger('Adyen').error('MD is ... ' + request.httpParameterMap.get("MD").stringValue);
     // session.privacy.adyenResponse = adyenResponse;
     app.getView({
         ContinueURL: URLUtils.https(
