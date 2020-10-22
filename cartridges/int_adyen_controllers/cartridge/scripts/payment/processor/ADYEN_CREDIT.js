@@ -137,7 +137,6 @@ function Authorize(args) {
 	                issuerUrl : result.RedirectObject.url,
 	                paRequest : result.RedirectObject.data.PaReq,
 	                MD : result.RedirectObject.data.MD,
-                    test: 'test'
 	            })};
 	    }
 	    else{

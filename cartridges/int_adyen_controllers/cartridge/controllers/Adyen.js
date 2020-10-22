@@ -71,8 +71,6 @@ function showConfirmation() {
     var orderNumber = request.httpParameterMap.get('merchantReference')
         .stringValue;
     var order = OrderMgr.getOrder(orderNumber);
-    Logger.getLogger('Adyen').error(JSON.stringify(orderNumber));
-    Logger.getLogger('Adyen').error(order);
     var paymentInstruments = order.getPaymentInstruments("Adyen");
     var adyenPaymentInstrument;
     var paymentData;
@@ -99,6 +97,7 @@ function showConfirmation() {
         'paymentData' : paymentData
     }
 	var result = adyenCheckout.doPaymentDetailsCall(requestObject);
+    Logger.getLogger('Adyen').error('result ref is ... ' + JSON.stringify(result));
     Transaction.wrap(function () {
         adyenPaymentInstrument.custom.adyenPaymentData = null;
         adyenPaymentInstrument.custom.adyenMD = null;
@@ -112,13 +111,14 @@ function showConfirmation() {
         Logger.getLogger('Adyen').error('Invalid /payments/details call');
         return response.redirect(URLUtils.httpHome());
     }
-    var merchantRefOrder = OrderMgr.getOrder(result.merchantReference);
-    Logger.getLogger('Adyen').error('result for showConfirmation + ' + JSON.stringify(result));
+    var merchantRef = result.merchantReference;
+    Logger.getLogger('Adyen').error('merch ref is ... ' + merchantRef);
+    var merchantRefOrder = OrderMgr.getOrder(merchantRef);
+    Logger.getLogger('Adyen').error(merchantRefOrder);
     var paymentInstrument;
     if(merchantRefOrder) {
          paymentInstrument = merchantRefOrder.getPaymentInstruments('Adyen')[0];
     }
-
 
 	if (result.resultCode == 'Authorised' || result.resultCode == 'Pending' || result.resultCode == 'Received') {
         if(result.resultCode == "Received" && result.paymentMethod.indexOf("alipay_hk") > -1) {
@@ -136,7 +136,7 @@ function showConfirmation() {
         Transaction.wrap(function () {
             AdyenHelper.savePaymentDetails(paymentInstrument, merchantRefOrder, result);
         });
-		orderConfirm(result.merchantReference);
+		orderConfirm(merchantRef);
         // OrderModel.submit(order);
         // clearForms();
         // app.getController('COSummary').ShowConfirmation(order);
@@ -376,33 +376,6 @@ function authorizeWithForm() {
             },
         };
 
-
-        // if (session.privacy.orderNo && session.privacy.paymentMethod) {
-        //     try {
-        //         order = OrderMgr.getOrder(session.privacy.orderNo);
-        //         paymentInstrument = order.getPaymentInstruments(session.privacy.paymentMethod)[0];
-        //     } catch (e) {
-        //         Logger.getLogger("Adyen").error("Unable to retrieve order data from session.");
-        //         Transaction.wrap(function () {
-        //             OrderMgr.failOrder(order);
-        //         });
-        //         app.getController('COSummary').Start({
-        //             PlaceOrderError: new Status(Status.ERROR, 'confirm.error.declined', '')
-        //         });
-        //         return {};
-        //     }
-
-        // clearCustomSessionFields();
-        // Transaction.begin();
-        // var adyenCheckout = require('*/cartridge/scripts/adyenCheckout');
-        // var jsonRequest = {
-        //     "paymentData": paymentInstrument.custom.adyenPaymentData,
-        //     "details": {
-        //         "MD": adyenResponse.MD,
-        //         "PaRes": adyenResponse.PaRes
-        //     }
-        // };
-
         var result = adyenCheckout.doPaymentDetailsCall(jsonRequest);
         Logger.getLogger('Adyen').error('result is ... ' + JSON.stringify(result));
         if (result.invalidRequest) {
@@ -434,7 +407,7 @@ function authorizeWithForm() {
         // Save full response to transaction custom attribute
         paymentInstrument.paymentTransaction.custom.Adyen_log = JSON.stringify(result);
 
-        var merchantRef = result.additionalData.merchantReference || orderNo;
+        var merchantRef = result.merchantReference;
         order = OrderMgr.getOrder(merchantRef);
         order.setPaymentStatus(dw.order.Order.PAYMENT_STATUS_PAID);
         order.setExportStatus(dw.order.Order.EXPORT_STATUS_READY);
