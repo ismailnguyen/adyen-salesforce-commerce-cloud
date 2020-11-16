@@ -105,12 +105,16 @@ function Authorize(orderNumber, paymentInstrument, paymentProcessor) {
 
         session.privacy.orderNo = order.orderNo;
         session.privacy.paymentMethod = paymentInstrument.paymentMethod;
+
+        var signature = AdyenHelper.getAdyenHash(result.RedirectObject.url.substr(result.RedirectObject.url.length - 25), result.RedirectObject.data.MD.substr(1, 25));
+
         return {
             authorized: true,
             authorized3d: true,
             order: order,
             paymentInstrument: paymentInstrument,
-            redirectObject: result.RedirectObject
+            redirectObject: result.RedirectObject,
+            signature: signature
         };
     }
 
